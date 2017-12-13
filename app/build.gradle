@@ -1,0 +1,134 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
+
+//greendao的相关配置  写android内部也行
+//greendao {
+//    schemaVersion 1//数据库版本号
+//    daoPackage 'com.peacock.mobile.helper.greendao'//设置DaoMaster、DaoSession、Dao包名
+//    targetGenDir 'src/main/java'//设置DaoMaster、DaoSession、Dao目录  不设置则dao文件再build文件夹中
+//    targetGenDirTest：设置生成单元测试目录
+//    generateTests：设置自动生成单元测试用例
+//}
+
+def releaseTime = {
+    return new Date().format("yyMMdd", TimeZone.getTimeZone("GMT+8"))
+}
+
+android {
+    compileSdkVersion 26
+
+    greendao {
+        schemaVersion 1
+        daoPackage 'com.it.andy.greendao'
+//        targetGenDir 'src/main/java/'
+    }
+
+    defaultConfig {
+        applicationId "com.it.person"
+        minSdkVersion 15
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        //名称最好就写debug和relase, 下面就不需要执行signingConfigs.debug了
+        debug{
+            //
+        }
+
+        release {
+            keyAlias 'andy'
+            keyPassword 'android'
+            storeFile file('D:/clientKey.jks')
+            storePassword 'android'
+        }
+    }
+
+    // 友盟多渠道打包
+//as3.0必须加flavorDimensions
+    flavorDimensions 'api'
+    productFlavors {
+        wandoujia {}
+        _360 {}
+        baidu {}
+        xiaomi {}
+        tencent {}
+        taobao {}
+    }
+
+    productFlavors.all { flavor ->
+        flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
+    buildTypes {
+
+        debug {
+            // 显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            versionNameSuffix "-debug"
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            //可加可不加, 只要signingConfigs内部的配置写的是标准的
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            minifyEnabled false
+            multiDexEnabled true
+            zipAlignEnabled true
+            shrinkResources false  // true 移除无用的resource文件
+            signingConfig signingConfigs.release   //会覆盖defaultconfig的内容
+
+
+        }
+    }
+
+    //位置随便写
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                // 输出apk名称为andy_v1.0_2015-01-15_wandoujia.apk
+                def fileName = "andy_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                outputFileName = fileName
+            }
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    //network
+    //    implementation 'com.google.code.gson:gson:2.2.4'  //converter-gson已经依赖
+    implementation 'io.reactivex.rxjava2:rxjava:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    //打印网络请求日志..
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    //retrofit添加对rxjava2的支持
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    //    compile 'com.squareup.okhttp3:okhttp:3.4.1'  //retrofit 2已经依赖
+    compile 'com.youth.banner:banner:1.4.10'
+    //轮播图
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.jakewharton:butterknife:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+    //不加会空指针
+    compile 'org.greenrobot:greendao:3.2.0'
+    implementation 'com.android.support:design:27.0.2'
+    implementation 'com.android.support:cardview-v7:27.0.2'
+}

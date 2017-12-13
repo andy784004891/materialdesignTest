@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.it.personal">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:name="com.it.personal.base.ApplicationApp"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DesignDemo">
+
+        <activity android:name="com.it.personal.ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.it.personal.ui.CheeseDetailActivity"
+            android:parentActivityName="com.it.personal.ui.MainActivity">
+            <!--设置parent就是为了加一个返回的箭头,并实现返回功能
+            也可以通过重写onOptionsItemSelected,参考该类的写法-->
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.it.personal.ui.MainActivity" />
+        </activity>
+
+
+
+
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="${UMENG_CHANNEL_VALUE}"/>
+    </application>
+
+
+
+</manifest>
